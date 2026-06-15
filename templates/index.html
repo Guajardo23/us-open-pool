@@ -174,7 +174,12 @@
 
   /* ── Tier badge in pick cards ── */
   .tier-dot { display:inline-block; border-radius:3px; padding:.05rem .35rem; font-size:.68rem; font-weight:700; margin-right:.3rem; vertical-align:middle; }
-  .tier-dot.t1 { background:var(--usa-red); color:#fff; }
+  .tier-badge.t4 { background:#1a1a2e; color:#c0c0c0; border:1px solid #555; }
+  .tier-section.t4 { border-color:#555; background:#fafafa; }
+  .tier-dot.t4 { background:#333; color:#ddd; }
+  .pervert-radios { display:flex; gap:1.5rem; flex-wrap:wrap; }
+  .radio-label { display:flex; align-items:center; gap:.4rem; font-size:.95rem; cursor:pointer; }
+  .radio-label input[type=radio] { accent-color:#555; width:1rem; height:1rem; cursor:pointer; }
   .tier-dot.t2 { background:#d6e4f0; color:#0d3b66; }
   .tier-dot.t3 { background:#e9ecef; color:#555; }
 </style>
@@ -224,11 +229,11 @@
         </div>
         <div class="pick-grid">
           <div class="pick-slot form-row">
-            <label for="pick1"><span class="pick-num">1</span> Favorite Pick 1</label>
+            <label for="pick1">Favorite Pick 1</label>
             <select id="pick1"><option value="">-- Select Tier 1 golfer --</option></select>
           </div>
           <div class="pick-slot form-row">
-            <label for="pick2"><span class="pick-num">2</span> Favorite Pick 2</label>
+            <label for="pick2">Favorite Pick 2</label>
             <select id="pick2"><option value="">-- Select Tier 1 golfer --</option></select>
           </div>
         </div>
@@ -246,11 +251,11 @@
         </div>
         <div class="pick-grid">
           <div class="pick-slot form-row">
-            <label for="pick3"><span class="pick-num">3</span> Contender Pick 1</label>
+            <label for="pick3">Contender Pick 1</label>
             <select id="pick3"><option value="">-- Select Tier 2 golfer --</option></select>
           </div>
           <div class="pick-slot form-row">
-            <label for="pick4"><span class="pick-num">4</span> Contender Pick 2</label>
+            <label for="pick4">Contender Pick 2</label>
             <select id="pick4"><option value="">-- Select Tier 2 golfer --</option></select>
           </div>
         </div>
@@ -267,8 +272,30 @@
           <span class="tier-pick-count">Pick 1</span>
         </div>
         <div class="pick-slot form-row">
-          <label for="pick5"><span class="pick-num">5</span> Longshot Pick</label>
+          <label for="pick5">Longshot Pick</label>
             <select id="pick5"><option value="">-- Select Tier 3 golfer --</option></select>
+        </div>
+      </div>
+
+      <!-- Tier 4 -->
+      <div class="tier-section t4">
+        <div class="tier-header">
+          <span class="tier-badge t4">T4</span>
+          <div>
+            <div class="tier-title">Pervert Pick</div>
+            <div class="tier-desc">No scoring. Just choose the pervert you'd have a beer with if forced to.</div>
+          </div>
+          <span class="tier-pick-count">Pick 1</span>
+        </div>
+        <div class="pick-slot form-row" style="align-items:center">
+          <div class="pervert-radios">
+            <label class="radio-label">
+              <input type="radio" name="pick6" value="Tiger Woods" checked> Tiger Woods
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="pick6" value="Phil Mickelson"> Phil Mickelson
+            </label>
+          </div>
         </div>
       </div>
 
@@ -313,7 +340,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("nameInput").value = savedName;
     loadExistingPicks(savedName);
   }
-  setInterval(loadStatus, 60000);      // refresh data every 60s
+  setInterval(loadStatus, 180000);     // refresh data every 3 min
   setInterval(updateCountdown, 1000);  // tick countdown every second
   updateCountdown();
 });
@@ -327,6 +354,7 @@ async function loadField() {
   populateSelect("pick3", tierFields.tier2, "-- Select Tier 2 golfer --");
   populateSelect("pick4", tierFields.tier2, "-- Select Tier 2 golfer --");
   populateSelect("pick5", tierFields.tier3, "-- Select Tier 3 golfer --");
+  // pick6 is radio buttons — no population needed
 
   // Prevent same golfer in both T1 slots
   document.getElementById("pick1").addEventListener("change", () =>
@@ -435,11 +463,16 @@ function updateCountdown() {
 function loadExistingPicks(name) {
   if (!name || !appData.picks) return;
   const existing = appData.picks[name.trim()];
-  if (existing && existing.length === 5) {
-    existing.forEach((g, i) => {
+  if (existing && existing.length >= 5) {
+    existing.slice(0, 5).forEach((g, i) => {
       const el = document.getElementById(`pick${i+1}`);
       if (el) el.value = g;
     });
+    // restore T4 radio
+    if (existing[5]) {
+      const r = document.querySelector(`input[name="pick6"][value="${existing[5]}"]`);
+      if (r) r.checked = true;
+    }
     // Re-sync pair constraints after restoring saved picks
     if (tierFields.tier1.length) {
       syncTierPair("pick1", "pick2", tierFields.tier1, "-- Select Tier 1 golfer --");
@@ -494,15 +527,17 @@ async function submitPicks() {
   const name = document.getElementById("nameInput").value.trim();
   if (!name) { showMsg("Please enter your name.", "error"); return; }
 
-  // picks order: [T1a, T1b, T2a, T2b, T3]
+  // picks order: [T1a, T1b, T2a, T2b, T3, T4]
   const picks = Array.from({length: 5}, (_, i) =>
     (document.getElementById(`pick${i+1}`).value || "").trim()
   );
+  const pick6radio = document.querySelector('input[name="pick6"]:checked');
+  picks.push(pick6radio ? pick6radio.value : "");
 
   for (let i = 0; i < 5; i++) {
     if (!picks[i]) { showMsg(`Please make selection ${i+1}.`, "error"); return; }
   }
-  if (new Set(picks).size !== 5) { showMsg("All 5 picks must be different golfers.", "error"); return; }
+  if (new Set(picks.slice(0,5)).size !== 5) { showMsg("All 5 picks must be different golfers.", "error"); return; }
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;

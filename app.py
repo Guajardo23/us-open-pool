@@ -101,15 +101,17 @@ TIER3 = sorted([
 ])
 
 FIELD = sorted(TIER1 + TIER2 + TIER3)
-TIERS = {g: 1 for g in TIER1} | {g: 2 for g in TIER2} | {g: 3 for g in TIER3}
+TIER4 = ["Tiger Woods", "Phil Mickelson"]
+TIERS = {g: 1 for g in TIER1} | {g: 2 for g in TIER2} | {g: 3 for g in TIER3} | {g: 4 for g in TIER4}
 
 TIER_LABELS = {
     1: "Tier 1 — Favorites",
     2: "Tier 2 — Contenders",
     3: "Tier 3 — Longshots",
+    4: "Tier 4 — Pervert Pick",
 }
-# picks must be submitted in slot order: [T1, T1, T2, T2, T3]
-PICK_TIER_SLOTS = [1, 1, 2, 2, 3]
+# picks must be submitted in slot order: [T1, T1, T2, T2, T3, T4]
+PICK_TIER_SLOTS = [1, 1, 2, 2, 3, 4]
 
 # normalized lookup for forgiving name matching (handles accent differences)
 def _norm(s):
@@ -118,7 +120,7 @@ def _norm(s):
         if unicodedata.category(c) != "Mn"
     ).lower().strip()
 
-FIELD_NORM = {_norm(g): g for g in FIELD}
+FIELD_NORM = {_norm(g): g for g in FIELD + TIER4}
 
 # ── File helpers ──────────────────────────────────────────────────────────────
 def load_json(path, default=None):
@@ -213,7 +215,7 @@ def index():
 
 @app.route("/api/field")
 def get_field():
-    return jsonify({"tier1": TIER1, "tier2": TIER2, "tier3": TIER3})
+    return jsonify({"tier1": TIER1, "tier2": TIER2, "tier3": TIER3, "tier4": TIER4})
 
 @app.route("/api/status")
 def get_status():
@@ -253,7 +255,7 @@ def get_status():
         "venue":         TOURNAMENT_VENUE,
         "tiers":         TIERS,
         "tier_labels":   TIER_LABELS,
-        "field":         {"tier1": TIER1, "tier2": TIER2, "tier3": TIER3},
+        "field":         {"tier1": TIER1, "tier2": TIER2, "tier3": TIER3, "tier4": TIER4},
     })
 
 @app.route("/api/picks", methods=["POST"])
@@ -270,15 +272,19 @@ def submit_picks():
 
     if not name:
         return jsonify({"error": "Please enter your name."}), 400
-    if len(picks) != 5:
+    if len(picks) < 5 or len(picks) > 6:
         return jsonify({"error": "Select exactly 5 picks: 2 from Tier 1, 2 from Tier 2, 1 from Tier 3."}), 400
-    if len(set(picks)) != 5:
+
+    core_picks = picks[:5]
+    pervert_pick = picks[5] if len(picks) == 6 else ""
+
+    if len(set(core_picks)) != 5:
         return jsonify({"error": "All 5 picks must be different golfers."}), 400
 
     # Normalize and validate each pick against its required tier
     # Slot order: [T1-pick1, T1-pick2, T2-pick1, T2-pick2, T3-pick1]
     resolved = []
-    for i, pick in enumerate(picks):
+    for i, pick in enumerate(core_picks):
         canonical = FIELD_NORM.get(_norm(pick))
         if not canonical:
             return jsonify({"error": f"Golfer not in field: \"{pick}\". Check spelling."}), 400
@@ -287,6 +293,11 @@ def submit_picks():
         if actual_tier != expected_tier:
             return jsonify({"error": f"{canonical} is in {TIER_LABELS[actual_tier]}, not {TIER_LABELS[expected_tier]}."}), 400
         resolved.append(canonical)
+
+    # T4 Pervert Pick — stored for fun, no validation, no scoring
+    if pervert_pick:
+        t4_canonical = FIELD_NORM.get(_norm(pervert_pick)) or pervert_pick
+        resolved.append(t4_canonical)
 
     all_picks = load_json(PICKS_FILE)
     all_picks[name] = resolved
