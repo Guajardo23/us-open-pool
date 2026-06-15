@@ -12,7 +12,7 @@ Endpoints:
 
 import json, os, ssl, threading, time, unicodedata, urllib.request
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, date
 
 from flask import Flask, request, jsonify, send_from_directory
 import zoneinfo
@@ -461,8 +461,8 @@ def scrape_and_save():
 def _background_updater():
     while True:
         now = datetime.now(ET)
-        # Scrape Thu-Sun (weekday 3-6) between 6 AM and 9 PM ET
-        if now.weekday() in (3, 4, 5, 6) and 6 <= now.hour < 21:
+        # Only scrape during tournament week: Jun 18-21, 6 AM-9 PM ET
+        if now.date() >= date(2026, 6, 18) and now.weekday() in (3, 4, 5, 6) and 6 <= now.hour < 21:
             scrape_and_save()
         time.sleep(600)  # every 10 minutes
 
@@ -473,8 +473,9 @@ def start_updater():
     if _updater_started:
         return
     _updater_started = True
-    # Immediate first scrape
-    threading.Thread(target=scrape_and_save, daemon=True).start()
+    # Only kick off an immediate scrape once tournament week starts
+    if datetime.now(ET).date() >= date(2026, 6, 18):
+        threading.Thread(target=scrape_and_save, daemon=True).start()
     # Periodic updater
     threading.Thread(target=_background_updater, daemon=True).start()
     print("[app] Background standings updater started.")
