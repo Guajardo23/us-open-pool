@@ -20,9 +20,12 @@ import zoneinfo
 app = Flask(__name__)
 
 BASE_DIR       = os.path.dirname(os.path.abspath(__file__))
-PICKS_FILE     = os.path.join(BASE_DIR, "picks.json")
-STANDINGS_FILE = os.path.join(BASE_DIR, "standings.json")
-EARNINGS_FILE  = os.path.join(BASE_DIR, "earnings.json")
+# Persist data files to /data (Railway Volume mount point) if it exists,
+# otherwise fall back to the app directory for local development.
+DATA_DIR       = "/data" if os.path.isdir("/data") else BASE_DIR
+PICKS_FILE     = os.path.join(DATA_DIR, "picks.json")
+STANDINGS_FILE = os.path.join(DATA_DIR, "standings.json")
+EARNINGS_FILE  = os.path.join(DATA_DIR, "earnings.json")
 
 ET = zoneinfo.ZoneInfo("America/New_York")
 PT = zoneinfo.ZoneInfo("America/Los_Angeles")
