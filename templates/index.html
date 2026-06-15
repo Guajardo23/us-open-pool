@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 U.S. Open Pool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap">
+<style>
+  :root {
+    --navy:      #00205B;
+    --dark-navy: #000D2E;
+    --mid-blue:  #0A3D8F;
+    --usa-red:   #B22234;
+    --light-red: #FFD6D6;
+    --uso-green: #1a5940;
+    --bg:        #F5F6F8;
+    --card:      #ffffff;
+    --text:      #1a1a1a;
+    --muted:     #6c757d;
+    --border:    #ddd9d0;
+    --red:       #dc3545;
+    --green:     #198754;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* ── Header ── */
+  .header { background:linear-gradient(160deg, var(--dark-navy) 0%, #001A4A 55%, #002B70 100%); color:white; padding:2rem 1rem 1.6rem; text-align:center; position:relative; overflow:hidden; }
+  .header::before { content:''; position:absolute; inset:0; background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+  .header-inner { position:relative; }
+  .uso-eyebrow { font-size:.72rem; font-weight:700; letter-spacing:.25em; text-transform:uppercase; color:var(--light-red); opacity:.9; margin-bottom:.5rem; }
+  .header h1 { font-family:'Playfair Display', Georgia, 'Times New Roman', serif; font-size:2.8rem; font-weight:900; letter-spacing:.08em; line-height:1; color:white; margin:0; }
+  .uso-rule { width:4rem; height:2px; background:var(--usa-red); margin:.7rem auto; }
+  .header .subtitle { font-size:.82rem; opacity:.75; letter-spacing:.04em; }
+  .uso-joke { font-size:.7rem; opacity:.35; font-style:italic; margin-top:.3rem; letter-spacing:.02em; }
+
+  /* ── Countdown bar ── */
+  .countdown-bar { background:var(--usa-red); color:#fff; text-align:center; padding:.6rem 1rem; font-weight:700; font-size:.88rem; letter-spacing:.02em; }
+  .countdown-bar.locked { background:var(--uso-green); color:white; }
+
+  /* ── Tabs ── */
+  .tabs { display:flex; background:var(--navy); border-bottom:1px solid rgba(255,255,255,.08); }
+  .tab { flex:1; padding:.85rem 1rem; background:none; border:none; color:rgba(255,255,255,.55); font-size:.93rem; font-weight:700; cursor:pointer; border-bottom:3px solid transparent; transition:all .15s; letter-spacing:.02em; }
+  .tab:hover { color:white; background:rgba(255,255,255,.06); }
+  .tab.active { color:white; border-bottom-color:var(--usa-red); background:rgba(255,255,255,.04); }
+
+  /* ── Container ── */
+  .container { max-width:960px; margin:0 auto; padding:1.5rem 1rem; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* ── Cards ── */
+  .card { background:var(--card); border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.07); padding:1.5rem; margin-bottom:1.5rem; }
+  .card h2 { font-size:1.25rem; color:var(--navy); margin-bottom:.35rem; }
+  .card .hint { color:var(--muted); font-size:.88rem; margin-bottom:1.25rem; }
+
+  /* ── Form ── */
+  .form-row { margin-bottom:1rem; }
+  .form-row label { display:block; font-weight:600; font-size:.88rem; margin-bottom:.35rem; color:var(--navy); }
+  .form-row input[type=text], .form-row select {
+    width:100%; padding:.65rem .85rem; font-size:.95rem;
+    border:1.5px solid var(--border); border-radius:8px; outline:none;
+    background:white; color:var(--text);
+    transition:border-color .15s;
+    -webkit-appearance:none; appearance:none;
+  }
+  .form-row select {
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2300205B' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right .85rem center;
+    padding-right:2.5rem; cursor:pointer;
+  }
+  .form-row input[type=text]:focus, .form-row select:focus { border-color:var(--navy); box-shadow:0 0 0 3px rgba(0,32,91,.1); }
+  .form-row input[type=text].invalid, .form-row select.invalid { border-color:var(--red); background:#fff5f5; }
+  .pick-grid { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; margin-bottom:1rem; }
+  @media(max-width:500px){ .pick-grid { grid-template-columns:1fr; } }
+  .pick-slot label { display:flex; align-items:center; gap:.5rem; }
+  .pick-num { background:var(--navy); color:white; border-radius:50%; width:1.4rem; height:1.4rem; display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; flex-shrink:0; }
+
+  .btn-primary {
+    width:100%; padding:.8rem 1rem; background:var(--navy); color:white;
+    border:none; border-radius:8px; font-size:1rem; font-weight:700;
+    cursor:pointer; transition:background .15s; margin-top:.5rem;
+  }
+  .btn-primary:hover { background:#003080; }
+  .btn-primary:disabled { background:#aab0c0; cursor:not-allowed; }
+
+  /* ── Messages ── */
+  .msg { padding:.75rem 1rem; border-radius:8px; font-size:.9rem; font-weight:500; margin-top:.75rem; }
+  .msg.success { background:#d1e7dd; color:#0a3622; }
+  .msg.error   { background:#f8d7da; color:#58151c; }
+  .msg.info    { background:#cfe2ff; color:#084298; }
+  .msg.hidden  { display:none; }
+
+  /* ── Lock overlay ── */
+  .lock-notice { text-align:center; padding:2rem 1rem; color:var(--muted); }
+  .lock-notice .lock-icon { font-size:2.5rem; display:block; margin-bottom:.5rem; }
+  .lock-notice strong { display:block; color:var(--navy); font-size:1.1rem; margin-bottom:.35rem; }
+
+  /* ── All entries (picks tab) ── */
+  .entries-header { display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem; }
+  .entries-header h3 { font-size:1.05rem; color:var(--navy); }
+  .entries-count { background:var(--navy); color:white; border-radius:20px; padding:.1rem .65rem; font-size:.8rem; font-weight:700; }
+  .entry-row { display:flex; justify-content:space-between; align-items:flex-start; padding:.65rem 0; border-bottom:1px solid var(--border); gap:1rem; }
+  .entry-row:last-child { border-bottom:none; }
+  .entry-name { font-weight:700; min-width:80px; color:var(--navy); }
+  .entry-picks { display:flex; flex-wrap:wrap; gap:.35rem; }
+  .pick-pill { background:#eef2fa; color:#1a2a55; border-radius:20px; padding:.2rem .6rem; font-size:.78rem; font-weight:500; }
+  .entry-picks.mine .pick-pill { background:var(--navy); color:var(--light-red); }
+
+  /* ── Status banner ── */
+  .status-banner { text-align:center; padding:.7rem; font-weight:600; font-size:.95rem; border-radius:8px; margin-bottom:1rem; }
+  .status-banner.default   { background:var(--usa-red); color:#fff; }
+  .status-banner.projected { background:#d6e4f0; color:#0d3b66; }
+  .status-banner.final     { background:var(--navy); color:white; font-size:1.05rem; }
+  .updated { text-align:center; color:var(--muted); font-size:.82rem; margin-bottom:.75rem; }
+
+  /* ── Leaderboard table ── */
+  .leaderboard { width:100%; border-collapse:collapse; background:var(--card); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); margin-bottom:1.5rem; }
+  .leaderboard th { background:var(--navy); color:white; padding:.7rem 1rem; text-align:left; font-size:.78rem; text-transform:uppercase; letter-spacing:.5px; }
+  .leaderboard th.money { text-align:right; }
+  .leaderboard td { padding:.6rem 1rem; border-bottom:1px solid var(--border); font-size:.93rem; }
+  .leaderboard td.money { text-align:right; font-weight:700; font-variant-numeric:tabular-nums; color:var(--navy); }
+  .leaderboard tr:last-child td { border-bottom:none; }
+  .leaderboard tr:hover { background:#f0f4fa; }
+  .leaderboard tr.top { background:#eef2f9; }
+
+  .rank { display:inline-block; min-width:1.8rem; text-align:center; font-weight:700; font-size:1.05rem; }
+  .contestant-name { font-weight:600; font-size:1rem; }
+  .best-note { color:var(--muted); font-size:.78rem; margin-left:.5rem; }
+
+  /* ── Pick cards ── */
+  .picks-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+  .pick-card { background:var(--card); border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.06); overflow:hidden; }
+  .pick-card-header { background:var(--navy); color:white; padding:.6rem 1rem; display:flex; justify-content:space-between; align-items:center; }
+  .pick-card-header .pch-name { font-weight:700; font-size:1rem; }
+  .pick-card-header .pch-rank { background:var(--usa-red); color:white; border-radius:50%; width:1.6rem; height:1.6rem; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:.78rem; margin-right:.4rem; }
+  .pick-card-header .pch-total { font-weight:600; color:var(--light-red); }
+  .pick-card table { width:100%; border-collapse:collapse; }
+  .pick-card td { padding:.42rem .75rem; border-bottom:1px solid #f0f0f0; font-size:.87rem; }
+  .pick-card tr:last-child td { border-bottom:none; }
+  .golfer-name { font-weight:500; }
+  .golfer-score { color:var(--muted); text-align:center; min-width:4.5rem; white-space:nowrap; }
+  .golfer-score.under { color:var(--red); font-weight:600; }
+  .pick-amt { text-align:right; font-variant-numeric:tabular-nums; color:var(--muted); min-width:5rem; }
+  .pick-amt.has { color:var(--navy); font-weight:600; }
+
+  /* ── Position badges ── */
+  .pos { display:inline-block; background:#e9ecef; border-radius:4px; padding:.1rem .35rem; font-size:.73rem; font-weight:700; margin-right:.3rem; min-width:1.9rem; text-align:center; }
+  .pos.leader { background:var(--usa-red); color:white; }
+  .pos.top10  { background:#d6e4f0; color:#0d3b66; }
+  .pos.mc     { background:#f8d7da; color:#721c24; }
+
+  /* ── Footer ── */
+  .footer { text-align:center; color:var(--muted); font-size:.8rem; padding:2rem 0; }
+
+  /* ── No data ── */
+  .no-data { text-align:center; padding:3rem 1rem; color:var(--muted); }
+  .no-data .icon { font-size:2.5rem; display:block; margin-bottom:.5rem; }
+
+  /* ── Tier sections in pick form ── */
+  .tier-section { border:2px solid var(--border); border-radius:10px; padding:1rem 1.1rem; margin-bottom:1.25rem; }
+  .tier-header { display:flex; align-items:center; gap:.7rem; margin-bottom:.9rem; }
+  .tier-badge { display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:.25rem .7rem; font-size:.78rem; font-weight:800; letter-spacing:.5px; text-transform:uppercase; flex-shrink:0; }
+  .tier-badge.t1 { background:var(--usa-red); color:#fff; }
+  .tier-badge.t2 { background:#d6e4f0; color:#0d3b66; }
+  .tier-badge.t3 { background:#e9ecef; color:#495057; }
+  .tier-section.t1 { border-color:#B22234; }
+  .tier-section.t2 { border-color:#9abfda; }
+  .tier-section.t3 { border-color:#ced4da; }
+  .tier-title { font-weight:700; font-size:.95rem; color:var(--navy); }
+  .tier-desc  { font-size:.8rem; color:var(--muted); margin-top:.1rem; }
+  .tier-pick-count { margin-left:auto; font-size:.8rem; font-weight:600; color:var(--muted); }
+
+  /* ── Tier badge in pick cards ── */
+  .tier-dot { display:inline-block; border-radius:3px; padding:.05rem .35rem; font-size:.68rem; font-weight:700; margin-right:.3rem; vertical-align:middle; }
+  .tier-dot.t1 { background:var(--usa-red); color:#fff; }
+  .tier-dot.t2 { background:#d6e4f0; color:#0d3b66; }
+  .tier-dot.t3 { background:#e9ecef; color:#555; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="uso-eyebrow">126th Championship &middot; June 18&ndash;21, 2026</div>
+    <h1>U.S. OPEN</h1>
+    <div class="uso-rule"></div>
+    <div class="subtitle" id="venueSubtitle">Pool &middot; Shinnecock Hills &middot; 2 Favorites + 2 Contenders + 1 Longshot</div>
+    <div class="uso-joke">hehe, shiny cock</div>
+  </div>
+</div>
+
+<div class="countdown-bar" id="countdownBar">Loading...</div>
+
+<nav class="tabs">
+  <button class="tab active" id="tabPicks" onclick="showTab('picks')">🏌️ Submit Picks</button>
+  <button class="tab"        id="tabBoard" onclick="showTab('board')">🏆 Leaderboard</button>
+</nav>
+
+<div class="container">
+
+  <!-- ── PICKS TAB ── -->
+  <div id="tab-picks" class="tab-content active">
+
+    <div class="card" id="pickFormCard">
+      <h2>Enter Your Picks</h2>
+      <p class="hint">Pick <strong>2 favorites</strong>, <strong>2 contenders</strong>, and <strong>1 longshot</strong>. Type a name to search. Picks lock Thursday 6:30 AM ET.</p>
+
+      <div class="form-row">
+        <label for="nameInput">Your Name</label>
+        <input type="text" id="nameInput" placeholder="First name or nickname" autocomplete="off" oninput="onNameInput()">
+      </div>
+
+      <!-- Tier 1 -->
+      <div class="tier-section t1">
+        <div class="tier-header">
+          <span class="tier-badge t1">T1</span>
+          <div>
+            <div class="tier-title">Favorites</div>
+            <div class="tier-desc">Top 15 in odds (Scheffler, McIlroy, Rahm&hellip;) &middot; odds +400&ndash;+3500</div>
+          </div>
+          <span class="tier-pick-count">Pick 2</span>
+        </div>
+        <div class="pick-grid">
+          <div class="pick-slot form-row">
+            <label for="pick1"><span class="pick-num">1</span> Favorite Pick 1</label>
+            <select id="pick1"><option value="">-- Select Tier 1 golfer --</option></select>
+          </div>
+          <div class="pick-slot form-row">
+            <label for="pick2"><span class="pick-num">2</span> Favorite Pick 2</label>
+            <select id="pick2"><option value="">-- Select Tier 1 golfer --</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier 2 -->
+      <div class="tier-section t2">
+        <div class="tier-header">
+          <span class="tier-badge t2">T2</span>
+          <div>
+            <div class="tier-title">Contenders</div>
+            <div class="tier-desc">Ranked 16–80 in odds (Spieth, Matsuyama, Spaun&hellip;) &middot; odds +4000&ndash;+15000</div>
+          </div>
+          <span class="tier-pick-count">Pick 2</span>
+        </div>
+        <div class="pick-grid">
+          <div class="pick-slot form-row">
+            <label for="pick3"><span class="pick-num">3</span> Contender Pick 1</label>
+            <select id="pick3"><option value="">-- Select Tier 2 golfer --</option></select>
+          </div>
+          <div class="pick-slot form-row">
+            <label for="pick4"><span class="pick-num">4</span> Contender Pick 2</label>
+            <select id="pick4"><option value="">-- Select Tier 2 golfer --</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="tier-section t3">
+        <div class="tier-header">
+          <span class="tier-badge t3">T3</span>
+          <div>
+            <div class="tier-title">Longshot</div>
+            <div class="tier-desc">Ranked 81+ in odds (qualifiers, amateurs, dark horses&hellip;) &middot; odds +20000+</div>
+          </div>
+          <span class="tier-pick-count">Pick 1</span>
+        </div>
+        <div class="pick-slot form-row">
+          <label for="pick5"><span class="pick-num">5</span> Longshot Pick</label>
+            <select id="pick5"><option value="">-- Select Tier 3 golfer --</option></select>
+        </div>
+      </div>
+
+      <div id="formMsg" class="msg hidden"></div>
+      <button id="submitBtn" class="btn-primary" onclick="submitPicks()">Confirm Picks ✓</button>
+    </div>
+
+    <div class="card" id="allEntriesCard" style="display:none">
+      <div class="entries-header">
+        <h3>All Entries</h3>
+        <span class="entries-count" id="entriesCount">0</span>
+      </div>
+      <div id="allEntriesList"></div>
+    </div>
+
+  </div>
+
+  <!-- ── LEADERBOARD TAB ── -->
+  <div id="tab-board" class="tab-content">
+    <div class="status-banner default" id="statusBanner"></div>
+    <div class="updated" id="updatedTime"></div>
+    <div id="leaderboardSection"></div>
+    <div id="pickCardsSection"></div>
+  </div>
+
+</div>
+
+<div class="footer" id="footerNote"></div>
+
+
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let appData = {};
+let tierFields = {tier1: [], tier2: [], tier3: []};
+let savedName = localStorage.getItem("poolName") || "";
+
+// ── Init ─────────────────────────────────────────────────────
+window.addEventListener("DOMContentLoaded", async () => {
+  await Promise.all([loadField(), loadStatus()]);
+  if (savedName) {
+    document.getElementById("nameInput").value = savedName;
+    loadExistingPicks(savedName);
+  }
+  setInterval(loadStatus, 60000);      // refresh data every 60s
+  setInterval(updateCountdown, 1000);  // tick countdown every second
+  updateCountdown();
+});
+
+// ── Field ──────────────────────────────────────────────────────────────────
+async function loadField() {
+  const r = await fetch("/api/field");
+  tierFields = await r.json();
+  populateSelect("pick1", tierFields.tier1, "-- Select Tier 1 golfer --");
+  populateSelect("pick2", tierFields.tier1, "-- Select Tier 1 golfer --");
+  populateSelect("pick3", tierFields.tier2, "-- Select Tier 2 golfer --");
+  populateSelect("pick4", tierFields.tier2, "-- Select Tier 2 golfer --");
+  populateSelect("pick5", tierFields.tier3, "-- Select Tier 3 golfer --");
+
+  // Prevent same golfer in both T1 slots
+  document.getElementById("pick1").addEventListener("change", () =>
+    syncTierPair("pick1", "pick2", tierFields.tier1, "-- Select Tier 1 golfer --"));
+  document.getElementById("pick2").addEventListener("change", () =>
+    syncTierPair("pick1", "pick2", tierFields.tier1, "-- Select Tier 1 golfer --"));
+
+  // Prevent same golfer in both T2 slots
+  document.getElementById("pick3").addEventListener("change", () =>
+    syncTierPair("pick3", "pick4", tierFields.tier2, "-- Select Tier 2 golfer --"));
+  document.getElementById("pick4").addEventListener("change", () =>
+    syncTierPair("pick3", "pick4", tierFields.tier2, "-- Select Tier 2 golfer --"));
+}
+
+function populateSelect(id, players, placeholder) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    players.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join("");
+  if (current) sel.value = current;
+}
+
+// Remove the other slot's selection from this slot's options (and vice versa)
+function syncTierPair(idA, idB, players, placeholder) {
+  const selA = document.getElementById(idA);
+  const selB = document.getElementById(idB);
+  const valA = selA.value;
+  const valB = selB.value;
+
+  const rebuildOpts = (excludeVal, ownVal) =>
+    `<option value="">${placeholder}</option>` +
+    players
+      .filter(g => !excludeVal || g !== excludeVal)
+      .map(g => `<option value="${esc(g)}"${g === ownVal ? " selected" : ""}>${esc(g)}</option>`)
+      .join("");
+
+  selA.innerHTML = rebuildOpts(valB, valA);
+  selB.innerHTML = rebuildOpts(valA, valB);
+}
+
+// ── Status ─────────────────────────────────────────────────────────────────
+async function loadStatus() {
+  try {
+    const r = await fetch("/api/status");
+    appData = await r.json();
+  } catch (e) {
+    console.error("Status fetch failed", e);
+    return;
+  }
+
+  // Venue subtitle
+  if (appData.venue) {
+    document.getElementById("venueSubtitle").textContent =
+      "Pool \u00b7 " + appData.venue;
+  }
+
+  updateCountdown();
+  renderAllEntries();
+  renderLeaderboard();
+
+  if (appData.locked) {
+    lockForm();
+  }
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+function showTab(tab) {
+  ["picks", "board"].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle("active", t === tab);
+    document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.toggle("active", t === tab);
+  });
+  if (tab === "board") renderLeaderboard();
+}
+
+// ── Countdown ─────────────────────────────────────────────────────────────
+function updateCountdown() {
+  const bar = document.getElementById("countdownBar");
+  if (!appData.lock_iso) return;
+
+  const lockTime = new Date(appData.lock_iso);
+  const diff = lockTime - Date.now();
+
+  if (diff <= 0 || appData.locked) {
+    bar.textContent = "🔒 Picks are locked — tournament has started.";
+    bar.className = "countdown-bar locked";
+    return;
+  }
+
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+
+  let t = "Picks lock in ";
+  if (d > 0) t += `${d}d `;
+  t += `${h}h ${m}m ${s}s`;
+  bar.textContent = "⏰ " + t;
+  bar.className = "countdown-bar";
+}
+
+// ── Build pick slots ───────────────────────────────────────────────────────
+// (slots are now in static HTML — no longer generated by JS)
+
+// ── Load existing picks for a name ─────────────────────────────────────────
+function loadExistingPicks(name) {
+  if (!name || !appData.picks) return;
+  const existing = appData.picks[name.trim()];
+  if (existing && existing.length === 5) {
+    existing.forEach((g, i) => {
+      const el = document.getElementById(`pick${i+1}`);
+      if (el) el.value = g;
+    });
+    // Re-sync pair constraints after restoring saved picks
+    if (tierFields.tier1.length) {
+      syncTierPair("pick1", "pick2", tierFields.tier1, "-- Select Tier 1 golfer --");
+      syncTierPair("pick3", "pick4", tierFields.tier2, "-- Select Tier 2 golfer --");
+    }
+    showMsg(`Loaded your existing picks. Update them and confirm.`, "info");
+  }
+}
+
+function onNameInput() {
+  const name = document.getElementById("nameInput").value.trim();
+  if (name) localStorage.setItem("poolName", name);
+  // auto-load picks after a short pause
+  clearTimeout(window._nameTimer);
+  window._nameTimer = setTimeout(() => loadExistingPicks(name), 600);
+}
+
+// ── Lock form ──────────────────────────────────────────────────────────────
+function lockForm() {
+  const card = document.getElementById("pickFormCard");
+  if (!card) return;
+
+  const name = document.getElementById("nameInput").value.trim() || savedName;
+  const myPicks = name && appData.picks ? appData.picks[name] : null;
+  const tiers = appData.tiers || {};
+  const tierClass = {1:"t1",2:"t2",3:"t3"};
+  const tierShort = {1:"🥇 T1",2:"🎯 T2",3:"🎲 T3"};
+
+  card.innerHTML = `
+    <h2>Your Picks</h2>
+    ${myPicks ? `
+      <p class="hint" style="margin-bottom:1rem">Picks are locked. Here's what you submitted:</p>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem">
+        ${myPicks.map(g => {
+          const tc = tierClass[tiers[g]] || "t2";
+          return `<span class="tier-dot ${tc}">${tierShort[tiers[g]]||""}</span><span class="pick-pill" style="background:var(--navy);color:var(--light-red);font-size:.9rem;padding:.3rem .8rem">${esc(g)}</span>`;
+        }).join(" ")}
+      </div>
+    ` : `
+      <div class="lock-notice">
+        <span class="lock-icon">🔒</span>
+        <strong>Picks are locked</strong>
+        <p>The tournament has started. Good luck!</p>
+      </div>
+    `}
+  `;
+}
+
+// ── Submit picks ───────────────────────────────────────────────────────────
+async function submitPicks() {
+  clearMsg();
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name) { showMsg("Please enter your name.", "error"); return; }
+
+  // picks order: [T1a, T1b, T2a, T2b, T3]
+  const picks = Array.from({length: 5}, (_, i) =>
+    (document.getElementById(`pick${i+1}`).value || "").trim()
+  );
+
+  for (let i = 0; i < 5; i++) {
+    if (!picks[i]) { showMsg(`Please make selection ${i+1}.`, "error"); return; }
+  }
+  if (new Set(picks).size !== 5) { showMsg("All 5 picks must be different golfers.", "error"); return; }
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+
+  try {
+    const r = await fetch("/api/picks", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({name, picks}),
+    });
+    const data = await r.json();
+    if (data.ok) {
+      localStorage.setItem("poolName", name);
+      savedName = name;
+      showMsg(`✓ Picks saved for ${data.name}! Check the Leaderboard tab once the tournament starts.`, "success");
+      await loadStatus();
+    } else {
+      showMsg(data.error || "Something went wrong.", "error");
+    }
+  } catch (e) {
+    showMsg("Network error. Please try again.", "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Confirm Picks ✓";
+  }
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById("formMsg");
+  el.textContent = text;
+  el.className = `msg ${type}`;
+}
+function clearMsg() {
+  const el = document.getElementById("formMsg");
+  el.className = "msg hidden";
+  el.textContent = "";
+}
+
+// ── Render all entries (picks tab) ─────────────────────────────────────────
+function renderAllEntries() {
+  const picks = appData.picks || {};
+  const names = Object.keys(picks);
+  const card  = document.getElementById("allEntriesCard");
+  const list  = document.getElementById("allEntriesList");
+  const count = document.getElementById("entriesCount");
+
+  if (names.length === 0) { card.style.display = "none"; return; }
+  card.style.display = "block";
+  count.textContent = names.length;
+
+  const myName = (document.getElementById("nameInput").value.trim() || savedName).toLowerCase();
+
+  list.innerHTML = names.map(n => {
+    const mine = n.toLowerCase() === myName;
+    const pillClass = mine ? "entry-picks mine" : "entry-picks";
+    return `
+      <div class="entry-row">
+        <span class="entry-name">${esc(n)}</span>
+        <div class="${pillClass}">
+          ${picks[n].map(g => `<span class="pick-pill">${esc(g)}</span>`).join("")}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ── Render leaderboard ─────────────────────────────────────────────────────
+function renderLeaderboard() {
+  const results   = appData.results || [];
+  const picks     = appData.picks || {};
+  const hasData   = appData.use_projected || appData.use_final;
+  const moneyLabel = appData.use_projected ? "Projected" : "Total";
+
+  // Status banner
+  const banner = document.getElementById("statusBanner");
+  if (appData.use_final) {
+    banner.textContent = "🏆 Final Results";
+    banner.className = "status-banner final";
+  } else if (appData.use_projected) {
+    let label = appData.round || "In Progress";
+    if (appData.round_status) label += ` — ${appData.round_status}`;
+    banner.textContent = `🏌️ Projected Standings: ${label}`;
+    banner.className = "status-banner projected";
+  } else {
+    banner.textContent = "⛳ Tournament starts Thursday. Picks leaderboard will appear here.";
+    banner.className = "status-banner default";
+  }
+
+  // Updated time
+  document.getElementById("updatedTime").textContent =
+    appData.updated ? `Last updated: ${appData.updated}` : "";
+
+  const lbSection = document.getElementById("leaderboardSection");
+  const pcSection = document.getElementById("pickCardsSection");
+
+  // Footer
+  const n = Object.keys(picks).length;
+  document.getElementById("footerNote").innerHTML = n > 0
+    ? `${n} contestant${n !== 1 ? "s" : ""} &middot; 2 Favorites + 2 Contenders + 1 Longshot &middot; highest combined earnings wins${appData.use_projected ? "<br>Projected earnings based on current standings" : ""}`
+    : "";
+
+  if (results.length === 0) {
+    lbSection.innerHTML = `
+      <div class="no-data">
+        <span class="icon">⛳</span>
+        ${n > 0
+          ? "Tournament hasn't started yet — standings will appear here once play begins."
+          : "No picks submitted yet."}
+      </div>`;
+    pcSection.innerHTML = "";
+    return;
+  }
+
+  // ── Leaderboard table ──
+  let rows = results.map(r => {
+    const topClass = r.rank <= 3 && hasData ? ' class="top"' : "";
+    const badge    = hasData ? rankBadge(r.rank) : r.rank;
+    let bestNote   = "";
+    if (hasData && r.picks) {
+      const best = r.picks.reduce((a, b) => a.amount >= b.amount ? a : b, {amount:-1});
+      if (best.amount > 0)
+        bestNote = `<span class="best-note">Best: ${esc(best.golfer)}</span>`;
+    }
+    return `
+      <tr${topClass}>
+        <td><span class="rank">${badge}</span></td>
+        <td><span class="contestant-name">${esc(r.name)}</span>${bestNote}</td>
+        <td class="money">${fmtMoney(r.total)}</td>
+      </tr>`;
+  }).join("");
+
+  lbSection.innerHTML = `
+    <table class="leaderboard">
+      <thead><tr>
+        <th style="width:3rem">#</th>
+        <th>Contestant</th>
+        <th class="money">${moneyLabel} Earnings</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+
+  // ── Pick cards ──
+  let cards = results.map(r => {
+    const tiers = appData.tiers || {};
+    const tierClass = {1:"t1",2:"t2",3:"t3"};
+    const golferRows = (r.picks || []).map(p => {
+      const amtClass  = p.amount > 0 ? "pick-amt has" : "pick-amt";
+      const posHtml   = posBadge(p.position);
+      const scoreStr  = scoreDisplay(p.score, p.today);
+      const scoreClass = (p.score || "").startsWith("-") ? "golfer-score under" : "golfer-score";
+      const showScore  = hasData;
+      const tc = tierClass[tiers[p.golfer]] || "";
+      const tierDot = tc ? `<span class="tier-dot ${tc}">${tc.toUpperCase()}</span>` : "";
+      return `<tr>
+        <td class="golfer-name">${posHtml}${tierDot}${esc(p.golfer)}</td>
+        ${showScore ? `<td class="${scoreClass}">${esc(scoreStr)}</td>` : ""}
+        <td class="${amtClass}">${fmtMoney(p.amount)}</td>
+      </tr>`;
+    }).join("");
+
+    return `
+      <div class="pick-card">
+        <div class="pick-card-header">
+          <span>
+            <span class="pch-rank">${r.rank}</span>
+            <span class="pch-name">${esc(r.name)}</span>
+          </span>
+          <span class="pch-total">${fmtMoney(r.total)}</span>
+        </div>
+        <table>${golferRows}</table>
+      </div>`;
+  }).join("");
+
+  pcSection.innerHTML = `<div class="picks-grid">${cards}</div>`;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function fmtMoney(amt) {
+  if (!amt) return "—";
+  return "$" + Number(amt).toLocaleString("en-US", {maximumFractionDigits:0});
+}
+
+function rankBadge(rank) {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return `<span class="rank">${rank}</span>`;
+}
+
+function posBadge(pos) {
+  if (!pos) return "";
+  const up = pos.trim().toUpperCase();
+  if (up === "MC" || up === "CUT") return `<span class="pos mc">MC</span>`;
+  if (up === "WD" || up === "DQ")  return `<span class="pos mc">${up}</span>`;
+  const num = parseInt(up.replace("T",""));
+  if (num === 1)       return `<span class="pos leader">${pos}</span>`;
+  if (num && num <= 10) return `<span class="pos top10">${pos}</span>`;
+  return `<span class="pos">${pos}</span>`;
+}
+
+function scoreDisplay(score, today) {
+  const parts = [];
+  if (score) parts.push(score);
+  if (today) parts.push(`(${today})`);
+  return parts.join(" ");
+}
+</script>
+</body>
+</html>

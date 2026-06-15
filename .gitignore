@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# Runtime data — preserved on the server, not tracked in git
+picks.json
+standings.json
+earnings.json
+
+# OS
+.DS_Store
+Thumbs.db
