@@ -194,8 +194,8 @@
 <div class="countdown-bar" id="countdownBar">Loading...</div>
 
 <nav class="tabs">
-  <button class="tab active" id="tabPicks" onclick="showTab('picks')">🏌️ Submit Picks</button>
-  <button class="tab"        id="tabBoard" onclick="showTab('board')">🏆 Leaderboard</button>
+  <button class="tab active" id="tabPicks" onclick="showTab('picks')">Submit Picks</button>
+  <button class="tab"        id="tabBoard" onclick="showTab('board')">Leaderboard</button>
 </nav>
 
 <div class="container">
@@ -273,7 +273,7 @@
       </div>
 
       <div id="formMsg" class="msg hidden"></div>
-      <button id="submitBtn" class="btn-primary" onclick="submitPicks()">Confirm Picks ✓</button>
+      <button id="submitBtn" class="btn-primary" onclick="submitPicks()">Confirm Picks</button>
     </div>
 
     <div class="card" id="allEntriesCard" style="display:none">
@@ -411,7 +411,7 @@ function updateCountdown() {
   const diff = lockTime - Date.now();
 
   if (diff <= 0 || appData.locked) {
-    bar.textContent = "🔒 Picks are locked — tournament has started.";
+    bar.textContent = "Picks are locked — tournament has started.";
     bar.className = "countdown-bar locked";
     return;
   }
@@ -424,7 +424,7 @@ function updateCountdown() {
   let t = "Picks lock in ";
   if (d > 0) t += `${d}d `;
   t += `${h}h ${m}m ${s}s`;
-  bar.textContent = "⏰ " + t;
+  bar.textContent = t;
   bar.className = "countdown-bar";
 }
 
@@ -466,7 +466,7 @@ function lockForm() {
   const myPicks = name && appData.picks ? appData.picks[name] : null;
   const tiers = appData.tiers || {};
   const tierClass = {1:"t1",2:"t2",3:"t3"};
-  const tierShort = {1:"🥇 T1",2:"🎯 T2",3:"🎲 T3"};
+  const tierShort = {1:"T1",2:"T2",3:"T3"};
 
   card.innerHTML = `
     <h2>Your Picks</h2>
@@ -480,7 +480,7 @@ function lockForm() {
       </div>
     ` : `
       <div class="lock-notice">
-        <span class="lock-icon">🔒</span>
+        <span class="lock-icon">&#x1F512;</span>
         <strong>Picks are locked</strong>
         <p>The tournament has started. Good luck!</p>
       </div>
@@ -518,7 +518,7 @@ async function submitPicks() {
     if (data.ok) {
       localStorage.setItem("poolName", name);
       savedName = name;
-      showMsg(`✓ Picks saved for ${data.name}! Check the Leaderboard tab once the tournament starts.`, "success");
+      showMsg(`Picks saved for ${data.name}! Check the Leaderboard tab once the tournament starts.`, "success");
       await loadStatus();
     } else {
       showMsg(data.error || "Something went wrong.", "error");
@@ -527,7 +527,7 @@ async function submitPicks() {
     showMsg("Network error. Please try again.", "error");
   } finally {
     btn.disabled = false;
-    btn.textContent = "Confirm Picks ✓";
+    btn.textContent = "Confirm Picks";
   }
 }
 
@@ -580,12 +580,12 @@ function renderLeaderboard() {
   // Status banner
   const banner = document.getElementById("statusBanner");
   if (appData.use_final) {
-    banner.textContent = "🏆 Final Results";
+    banner.textContent = "Final Results";
     banner.className = "status-banner final";
   } else if (appData.use_projected) {
     let label = appData.round || "In Progress";
     if (appData.round_status) label += ` — ${appData.round_status}`;
-    banner.textContent = `🏌️ Projected Standings: ${label}`;
+    banner.textContent = `Projected Standings: ${label}`;
     banner.className = "status-banner projected";
   } else {
     banner.textContent = "⛳ Tournament starts Thursday. Picks leaderboard will appear here.";
@@ -693,7 +693,7 @@ function fmtMoney(amt) {
 }
 
 function rankBadge(rank) {
-  if (rank === 1) return "🥇";
+  if (rank === 1) return "";
   if (rank === 2) return "🥈";
   if (rank === 3) return "🥉";
   return `<span class="rank">${rank}</span>`;
