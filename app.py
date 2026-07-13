@@ -26,6 +26,16 @@ DATA_DIR       = "/data" if os.path.isdir("/data") else BASE_DIR
 PICKS_FILE     = os.path.join(DATA_DIR, "picks.json")
 STANDINGS_FILE = os.path.join(DATA_DIR, "standings.json")
 EARNINGS_FILE  = os.path.join(DATA_DIR, "earnings.json")
+WORLDCUP_FILE  = os.path.join(DATA_DIR, "worldcup.json")
+
+# Fun, non-scoring tiebreaker-of-the-heart: who wins the World Cup?
+WORLDCUP_OPTIONS = [
+    "Viva La France!",
+    "Espana, pendejo",
+    "The wankers from England",
+    "Don't cry for me, Argentina",
+    "World Cup? the thing with the feet?",
+]
 
 ET = zoneinfo.ZoneInfo("America/New_York")
 PT = zoneinfo.ZoneInfo("America/Los_Angeles")
@@ -240,6 +250,9 @@ def get_status():
         earnings_map = {}
 
     results = build_results(picks, earnings_map, golfers) if picks else []
+    worldcup = load_json(WORLDCUP_FILE)
+    for r in results:
+        r["worldcup"] = worldcup.get(r["name"], "")
     updated = datetime.now(PT).strftime("%B %d, %Y at %I:%M %p PT")
 
     return jsonify({
@@ -258,6 +271,7 @@ def get_status():
         "tiers":         TIERS,
         "tier_labels":   TIER_LABELS,
         "field":         {"tier1": TIER1, "tier2": TIER2, "tier3": TIER3},
+        "worldcup_options": WORLDCUP_OPTIONS,
     })
 
 @app.route("/api/picks", methods=["POST"])
@@ -269,8 +283,9 @@ def submit_picks():
     if not data:
         return jsonify({"error": "Invalid request body."}), 400
 
-    name  = (data.get("name") or "").strip()
-    picks = data.get("picks") or []
+    name     = (data.get("name") or "").strip()
+    picks    = data.get("picks") or []
+    worldcup = (data.get("worldcup") or "").strip()
 
     if not name:
         return jsonify({"error": "Please enter your name."}), 400
@@ -297,7 +312,13 @@ def submit_picks():
     all_picks[name] = resolved
     save_json(PICKS_FILE, all_picks)
 
-    return jsonify({"ok": True, "name": name, "picks": resolved})
+    # Fun World Cup answer — stored separately, never scored.
+    if worldcup and worldcup in WORLDCUP_OPTIONS:
+        all_wc = load_json(WORLDCUP_FILE)
+        all_wc[name] = worldcup
+        save_json(WORLDCUP_FILE, all_wc)
+
+    return jsonify({"ok": True, "name": name, "picks": resolved, "worldcup": worldcup})
 
 @app.route("/api/refresh", methods=["POST"])
 def force_refresh():

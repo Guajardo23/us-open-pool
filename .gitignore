@@ -10,6 +10,7 @@ venv/
 picks.json
 standings.json
 earnings.json
+worldcup.json
 
 # OS
 .DS_Store

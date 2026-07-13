@@ -178,6 +178,10 @@
   .tier-section.t4 { border-color:#555; background:#fafafa; }
   .tier-dot.t4 { background:#333; color:#ddd; }
   .pervert-radios { display:flex; gap:1.5rem; flex-wrap:wrap; }
+  #worldcupRadios { flex-direction:column; gap:.55rem; }
+  .tier-badge.wc { background:#1a7a3c; color:#fff; font-size:1rem; padding:.2rem .55rem; }
+  .tier-section.wc { border-color:#1a7a3c; background:#f5fbf6; }
+  .entry-wc { flex-basis:100%; font-size:.78rem; color:#1a7a3c; font-weight:600; margin-top:.15rem; }
   .radio-label { display:flex; align-items:center; gap:.4rem; font-size:.95rem; cursor:pointer; }
   .radio-label input[type=radio] { accent-color:#555; width:1rem; height:1rem; cursor:pointer; }
   .tier-dot.t2 { background:#d6e4f0; color:#0d3b66; }
@@ -274,6 +278,27 @@
         <div class="pick-slot form-row">
           <label for="pick5">Longshot Pick</label>
             <select id="pick5"><option value="">-- Select Tier 3 golfer --</option></select>
+        </div>
+      </div>
+
+      <!-- Fun question (no scoring) -->
+      <div class="tier-section wc">
+        <div class="tier-header">
+          <span class="tier-badge wc">&#x26BD;</span>
+          <div>
+            <div class="tier-title">Who's going to win the World Cup?</div>
+            <div class="tier-desc">Completely irrelevant. Doesn't count toward anything. Just for fun.</div>
+          </div>
+          <span class="tier-pick-count">Optional</span>
+        </div>
+        <div class="pick-slot form-row" style="align-items:flex-start">
+          <div class="pervert-radios" id="worldcupRadios">
+            <label class="radio-label"><input type="radio" name="worldcup" value="Viva La France!"> Viva La France!</label>
+            <label class="radio-label"><input type="radio" name="worldcup" value="Espana, pendejo"> Espana, pendejo</label>
+            <label class="radio-label"><input type="radio" name="worldcup" value="The wankers from England"> The wankers from England</label>
+            <label class="radio-label"><input type="radio" name="worldcup" value="Don't cry for me, Argentina"> Don't cry for me, Argentina</label>
+            <label class="radio-label"><input type="radio" name="worldcup" value="World Cup? the thing with the feet?"> World Cup? the thing with the feet?</label>
+          </div>
         </div>
       </div>
 
@@ -450,6 +475,12 @@ function loadExistingPicks(name) {
       syncTierPair("pick1", "pick2", tierFields.tier1, "-- Select Tier 1 golfer --");
       syncTierPair("pick3", "pick4", tierFields.tier2, "-- Select Tier 2 golfer --");
     }
+    // Restore the fun World Cup answer
+    const myResult = (appData.results || []).find(r => r.name === name.trim());
+    if (myResult && myResult.worldcup) {
+      const wc = document.querySelector(`input[name="worldcup"][value="${myResult.worldcup.replace(/"/g, '&quot;')}"]`);
+      if (wc) wc.checked = true;
+    }
     showMsg(`Loaded your existing picks. Update them and confirm.`, "info");
   }
 }
@@ -469,6 +500,8 @@ function lockForm() {
 
   const name = document.getElementById("nameInput").value.trim() || savedName;
   const myPicks = name && appData.picks ? appData.picks[name] : null;
+  const myResult = (appData.results || []).find(r => r.name === name);
+  const myWc = myResult ? myResult.worldcup : "";
   const tiers = appData.tiers || {};
   const tierClass = {1:"t1",2:"t2",3:"t3"};
   const tierShort = {1:"T1",2:"T2",3:"T3"};
@@ -483,6 +516,7 @@ function lockForm() {
           return `<span class="tier-dot ${tc}">${tierShort[tiers[g]]||""}</span><span class="pick-pill" style="background:var(--navy);color:var(--light-red);font-size:.9rem;padding:.3rem .8rem">${esc(g)}</span>`;
         }).join(" ")}
       </div>
+      ${myWc ? `<div class="entry-wc" style="margin-top:.6rem">&#x26BD; World Cup: ${esc(myWc)}</div>` : ""}
     ` : `
       <div class="lock-notice">
         <span class="lock-icon">&#x1F512;</span>
@@ -509,6 +543,9 @@ async function submitPicks() {
   }
   if (new Set(picks).size !== 5) { showMsg("All 5 picks must be different golfers.", "error"); return; }
 
+  const wcRadio  = document.querySelector('input[name="worldcup"]:checked');
+  const worldcup = wcRadio ? wcRadio.value : "";
+
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
   btn.textContent = "Saving…";
@@ -517,7 +554,7 @@ async function submitPicks() {
     const r = await fetch("/api/picks", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({name, picks}),
+      body: JSON.stringify({name, picks, worldcup}),
     });
     const data = await r.json();
     if (data.ok) {
@@ -561,14 +598,20 @@ function renderAllEntries() {
 
   const myName = (document.getElementById("nameInput").value.trim() || savedName).toLowerCase();
 
+  const wcByName = {};
+  (appData.results || []).forEach(r => { wcByName[r.name] = r.worldcup || ""; });
+
   list.innerHTML = names.map(n => {
     const mine = n.toLowerCase() === myName;
     const pillClass = mine ? "entry-picks mine" : "entry-picks";
+    const wc = wcByName[n];
+    const wcHtml = wc ? `<div class="entry-wc">&#x26BD; ${esc(wc)}</div>` : "";
     return `
       <div class="entry-row">
         <span class="entry-name">${esc(n)}</span>
         <div class="${pillClass}">
           ${picks[n].map(g => `<span class="pick-pill">${esc(g)}</span>`).join("")}
+          ${wcHtml}
         </div>
       </div>
     `;
