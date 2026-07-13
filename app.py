@@ -1,5 +1,5 @@
 """
-US Open Pool 2026 — Flask backend
+The Open Championship Pool 2026 — Flask backend
 Deploy to Railway: https://railway.app  (files persist across restarts)
 
 Endpoints:
@@ -30,91 +30,86 @@ EARNINGS_FILE  = os.path.join(DATA_DIR, "earnings.json")
 ET = zoneinfo.ZoneInfo("America/New_York")
 PT = zoneinfo.ZoneInfo("America/Los_Angeles")
 
-# Picks lock: Thursday June 18, 2026 at 6:30 AM Eastern (before first tee time)
-LOCK_DT = datetime(2026, 6, 18, 6, 30, 0, tzinfo=ET)
+# Picks lock: Thursday July 16, 2026 at 1:30 AM Eastern (≈6:30 AM BST first tee at Birkdale)
+LOCK_DT = datetime(2026, 7, 16, 1, 30, 0, tzinfo=ET)
 
 # ── Tournament info ───────────────────────────────────────────────────────────
-TOURNAMENT_NAME   = "US Open"
+TOURNAMENT_NAME   = "The Open Championship"
 TOURNAMENT_YEAR   = "2026"
-TOURNAMENT_VENUE  = "Shinnecock Hills Golf Club · Southampton, N.Y."
-PAR               = 70   # Shinnecock Hills par 70
+TOURNAMENT_VENUE  = "Royal Birkdale · Southport, England"
+PAR               = 70   # Royal Birkdale par 70
 
-# ── Payout table (~$22.5M purse, scaled from standard major structure) ────────
+# ── Payout table (~$17M purse, The Open Championship structure) ───────────────
 PAYOUT = {
-     1: 4050000,  2: 2430000,  3: 1530000,  4: 1080000,  5:  900000,
-     6:  810000,  7:  754000,  8:  697000,  9:  652000, 10:  607000,
-    11:  562000, 12:  517000, 13:  472000, 14:  427000, 15:  405000,
-    16:  382000, 17:  360000, 18:  337000, 19:  315000, 20:  292000,
-    21:  270000, 22:  252000, 23:  234000, 24:  217000, 25:  199000,
-    26:  180000, 27:  173000, 28:  166500, 29:  159700, 30:  153000,
-    31:  146000, 32:  139500, 33:  133000, 34:  127000, 35:  121500,
-    36:  115900, 37:  110000, 38:  105700, 39:  101200, 40:   96700,
-    41:   92200, 42:   87700, 43:   83200, 44:   78700, 45:   74200,
-    46:   69700, 47:   65200, 48:   61600, 49:   58500, 50:   56700,
+     1: 3100000,  2: 1759000,  3: 1128000,  4:  878000,  5:  707000,
+     6:  613000,  7:  527000,  8:  442000,  9:  402000, 10:  361500,
+    11:  328500, 12:  302000, 13:  283000, 14:  264000, 15:  250500,
+    16:  237500, 17:  224500, 18:  211500, 19:  198500, 20:  188000,
+    21:  179500, 22:  171000, 23:  162500, 24:  154000, 25:  145500,
+    26:  137000, 27:  132000, 28:  127000, 29:  122000, 30:  117000,
+    31:  112000, 32:  107000, 33:  102000, 34:   97500, 35:   93500,
+    36:   90000, 37:   86500, 38:   83500, 39:   80500, 40:   77500,
+    41:   74500, 42:   71500, 43:   68500, 44:   65500, 45:   62500,
+    46:   59500, 47:   56500, 48:   54000, 49:   52000, 50:   50500,
 }
 MC_PAYOUT = 0
 
-# ── US Open 2026 official field (156 players, confirmed from usopen.com) ─────
-# ── Tier definitions (based on pre-tournament DraftKings/ESPN BET odds) ──────
-# Tier 1 — Top 15 favorites   (+400 to +3500)  → pick 2
-# Tier 2 — Contenders, 16–80  (+4000 to ~+15000) → pick 2
-# Tier 3 — Longshots, 81+     (+20000+)          → pick 1
+# ── The Open Championship 2026 field (Royal Birkdale) ────────────────────────
+# Tier definitions are odds-based approximations built from the confirmed field.
+# Exact ESPN name spellings must be validated once ESPN publishes the field
+# (before Thursday's lock) so every pick scores.
+# Tier 1 — Top ~15 favorites          → pick 2
+# Tier 2 — Contenders                  → pick 2
+# Tier 3 — Longshots / qualifiers      → pick 1
 
 TIER1 = sorted([
-    "Scottie Scheffler", "Rory McIlroy", "Bryson DeChambeau", "Jon Rahm",
-    "Ludvig Åberg", "Xander Schauffele", "Tommy Fleetwood", "Collin Morikawa",
-    "Cameron Young", "Matt Fitzpatrick", "Viktor Hovland", "Brooks Koepka",
-    "Justin Thomas", "Justin Rose", "Tyrrell Hatton",
+    "Scottie Scheffler", "Rory McIlroy", "Jon Rahm", "Xander Schauffele",
+    "Bryson DeChambeau", "Ludvig Åberg", "Tommy Fleetwood", "Collin Morikawa",
+    "Viktor Hovland", "Tyrrell Hatton", "Justin Thomas", "Shane Lowry",
+    "Robert MacIntyre", "Joaquin Niemann", "Cameron Young",
 ])
 
 TIER2 = sorted([
-    "Hideki Matsuyama", "Wyndham Clark", "J.J. Spaun", "Jordan Spieth",
-    "Patrick Cantlay", "Sahith Theegala", "Shane Lowry", "Sam Burns",
-    "Robert MacIntyre", "Min Woo Lee", "Sungjae Im", "Keegan Bradley",
-    "Adam Scott", "Sepp Straka", "Harris English", "Brian Harman",
-    "Daniel Berger", "Aaron Rai", "Max Greyserman", "Jason Day",
-    "Akshay Bhatia", "Kurt Kitayama", "Rickie Fowler", "Alex Fitzpatrick",
-    "Nick Taylor", "Russell Henley", "Tom Kim", "Corey Conners",
-    "Maverick McNealy", "Ben Griffin", "Matt McCarty", "Jacob Bridgeman",
-    "Chris Gotterup", "Emiliano Grillo", "Dustin Johnson", "Si Woo Kim",
-    "Joaquin Niemann", "Ryan Fox", "Bud Cauley", "J.T. Poston",
-    "Andrew Novak", "Andrew Putnam", "Taylor Montgomery", "Davis Thompson",
-    "Patrick Reed", "Alejandro Tosti", "Nick Hardy", "Keith Mitchell",
-    "Pierceson Coody", "Max McGreevy", "Alex Noren", "Lucas Herbert",
-    "Patrick Rodgers", "Harry Hall", "Cole Hammer", "Ben James",
-    "Michael Kim", "Brandon Wu", "Gary Woodland", "Carlos Ortiz",
-    "Kristoffer Reitan", "David Puig", "Ugo Coussaud", "Neal Shipley",
-    "Nicolas Echavarria",
+    "Matt Fitzpatrick", "Russell Henley", "Hideki Matsuyama", "Jordan Spieth",
+    "Wyndham Clark", "J.J. Spaun", "Patrick Cantlay", "Sepp Straka",
+    "Sam Burns", "Keegan Bradley", "Justin Rose", "Corey Conners",
+    "Ben Griffin", "Maverick McNealy", "Min Woo Lee", "Aaron Rai",
+    "Sungjae Im", "Si Woo Kim", "Tom Kim", "Akshay Bhatia",
+    "Jason Day", "Adam Scott", "Cameron Smith", "Brian Harman",
+    "Harris English", "Nicolai Højgaard", "Rasmus Højgaard", "Thomas Detry",
+    "Sahith Theegala", "Michael Kim", "Chris Gotterup", "Marco Penge",
+    "Daniel Berger", "Nick Taylor", "Andrew Novak", "Alex Noren",
+    "Kurt Kitayama", "Rickie Fowler", "Jake Knapp", "Patrick Reed",
+    "Gary Woodland", "Matt McCarty", "Harry Hall", "Jacob Bridgeman",
+    "Max Greyserman", "Max Homa", "Brooks Koepka", "Ryan Fox",
+    "Billy Horschel", "Matt Wallace", "Li Haotong", "Sam Stevens",
+    "Nico Echavarria", "Pierceson Coody", "Keith Mitchell", "Sami Välimäki",
 ])
 
 TIER3 = sorted([
-    "Laurie Canter", "Filippo Celli", "Hamilton Coleman", "Cooper Dossey",
-    "Adrien Dumont de Chassart", "Hennie du Plessis", "Ethan Fang",
-    "Marek Fleming", "Ryan Gerard", "Vaughn Harber", "Padraig Harrington",
-    "Harry Higgs", "Matthew Jordan", "Johnny Keefer", "T.K. Kim",
-    "Nathan Kimsey", "Chris Kirk", "Jake Knapp", "Greyson Leach",
-    "Bryan Lee", "Graeme McDowell", "James Nicholas", "Niklas Norgaard",
-    "Ryuichi Oiwa", "Kaito Onishi", "Jackson Ormond", "John Parry",
-    "Jake Peacock", "Chandler Phillips", "Giuseppe Puebla", "Mateo Pulcini",
-    "Logan Reilly", "Rocco Repetto Taylor", "Matthew Robles",
-    "Adrien Saddier", "Taihei Sato", "Jayden Schaper", "Matti Schmid",
-    "Jack Schoenberger", "Manav Shah", "Preston Stout", "Spencer Tibbits",
-    "Peter Uihlein", "Jackson Van Paris", "Dylan Wu",
-    "Sudarshan Yellamaraju", "Carl Yuan", "Zac Blair", "Michael Brennan",
+    "Padraig Harrington", "Stewart Cink", "Darren Clarke", "David Duval",
+    "Francesco Molinari", "Louis Oosthuizen", "Henrik Stenson", "Ryo Hisatsune",
+    "Eric Cole", "David Puig", "Dan Brown", "Laurie Canter",
+    "Rasmus Neergaard-Petersen", "Keita Nakajima", "Daniel Hillier", "Ángel Ayora",
+    "Joakim Lagergren", "Jordan Smith", "Dan Bradbury", "Hennie du Plessis",
+    "Andy Sullivan", "Bernd Wiesberger", "Kazuki Higa", "Casey Jarvis",
+    "Kota Kaneko", "Travis Smyth", "Scott Vincent", "Martin Couvra",
+    "Joe Dean", "John Parry", "Adrien Saddier", "Jayden Schaper",
+    "Kristoffer Reitan", "Mason Howell", "Jackson Koivun", "Fifa Laopakdee",
+    "Mateo Pulcini", "Jack Buchanan", "Stuart Grehan", "Tim Wiedemeyer",
+    "Lev Grinberg",
 ])
 
 FIELD = sorted(TIER1 + TIER2 + TIER3)
-TIER4 = ["Tiger Woods", "Phil Mickelson"]
-TIERS = {g: 1 for g in TIER1} | {g: 2 for g in TIER2} | {g: 3 for g in TIER3} | {g: 4 for g in TIER4}
+TIERS = {g: 1 for g in TIER1} | {g: 2 for g in TIER2} | {g: 3 for g in TIER3}
 
 TIER_LABELS = {
     1: "Tier 1 — Favorites",
     2: "Tier 2 — Contenders",
     3: "Tier 3 — Longshots",
-    4: "Tier 4 — Pervert Pick",
 }
-# picks must be submitted in slot order: [T1, T1, T2, T2, T3, T4]
-PICK_TIER_SLOTS = [1, 1, 2, 2, 3, 4]
+# picks must be submitted in slot order: [T1, T1, T2, T2, T3]
+PICK_TIER_SLOTS = [1, 1, 2, 2, 3]
 
 # normalized lookup for forgiving name matching (handles accent differences)
 def _norm(s):
@@ -123,7 +118,7 @@ def _norm(s):
         if unicodedata.category(c) != "Mn"
     ).lower().strip()
 
-FIELD_NORM = {_norm(g): g for g in FIELD + TIER4}
+FIELD_NORM = {_norm(g): g for g in FIELD}
 
 # ── File helpers ──────────────────────────────────────────────────────────────
 def load_json(path, default=None):
@@ -218,7 +213,7 @@ def index():
 
 @app.route("/api/field")
 def get_field():
-    return jsonify({"tier1": TIER1, "tier2": TIER2, "tier3": TIER3, "tier4": TIER4})
+    return jsonify({"tier1": TIER1, "tier2": TIER2, "tier3": TIER3})
 
 @app.route("/api/status")
 def get_status():
@@ -258,7 +253,7 @@ def get_status():
         "venue":         TOURNAMENT_VENUE,
         "tiers":         TIERS,
         "tier_labels":   TIER_LABELS,
-        "field":         {"tier1": TIER1, "tier2": TIER2, "tier3": TIER3, "tier4": TIER4},
+        "field":         {"tier1": TIER1, "tier2": TIER2, "tier3": TIER3},
     })
 
 @app.route("/api/picks", methods=["POST"])
@@ -275,19 +270,16 @@ def submit_picks():
 
     if not name:
         return jsonify({"error": "Please enter your name."}), 400
-    if len(picks) < 5 or len(picks) > 6:
+    if len(picks) != 5:
         return jsonify({"error": "Select exactly 5 picks: 2 from Tier 1, 2 from Tier 2, 1 from Tier 3."}), 400
 
-    core_picks = picks[:5]
-    pervert_pick = picks[5] if len(picks) == 6 else ""
-
-    if len(set(core_picks)) != 5:
+    if len(set(picks)) != 5:
         return jsonify({"error": "All 5 picks must be different golfers."}), 400
 
     # Normalize and validate each pick against its required tier
     # Slot order: [T1-pick1, T1-pick2, T2-pick1, T2-pick2, T3-pick1]
     resolved = []
-    for i, pick in enumerate(core_picks):
+    for i, pick in enumerate(picks):
         canonical = FIELD_NORM.get(_norm(pick))
         if not canonical:
             return jsonify({"error": f"Golfer not in field: \"{pick}\". Check spelling."}), 400
@@ -296,11 +288,6 @@ def submit_picks():
         if actual_tier != expected_tier:
             return jsonify({"error": f"{canonical} is in {TIER_LABELS[actual_tier]}, not {TIER_LABELS[expected_tier]}."}), 400
         resolved.append(canonical)
-
-    # T4 Pervert Pick — stored for fun, no validation, no scoring
-    if pervert_pick:
-        t4_canonical = FIELD_NORM.get(_norm(pervert_pick)) or pervert_pick
-        resolved.append(t4_canonical)
 
     all_picks = load_json(PICKS_FILE)
     all_picks[name] = resolved
@@ -315,9 +302,11 @@ def force_refresh():
     return jsonify({"ok": True, "msg": "Scrape triggered."})
 
 # ── ESPN standings scraper ────────────────────────────────────────────────────
-# ESPN uses a dedicated US Open endpoint during the tournament week.
-# Falls back to the PGA scoreboard if the USO endpoint returns no events.
-ESPN_URL     = "https://site.api.espn.com/apis/site/v2/sports/golf/uso/scoreboard"
+# ESPN's dedicated major endpoints (uso/open) typically 400, so we rely on the
+# PGA scoreboard, which lists The Open during its week. Because an opposite-field
+# event (e.g. Corales Puntacana) runs the same week, we select the event whose
+# name matches The Open rather than blindly taking the first one.
+ESPN_URL     = "https://site.api.espn.com/apis/site/v2/sports/golf/open/scoreboard"
 ESPN_URL_PGA = "https://site.api.espn.com/apis/site/v2/sports/golf/pga/scoreboard"
 
 def scrape_and_save():
@@ -340,8 +329,20 @@ def scrape_and_save():
         return
 
     events = data.get("events", [])
+    if not events:
+        print("[scraper] No events returned.")
+        return
 
-    event        = events[0]
+    # Pick The Open specifically (an opposite-field event may share the week).
+    event = None
+    for e in events:
+        nm = (e.get("name", "") + " " + e.get("shortName", "")).lower()
+        if "the open" in nm or "open championship" in nm:
+            event = e
+            break
+    if event is None:
+        event = events[0]
+
     competitions = event.get("competitions", [])
     if not competitions:
         return
@@ -464,8 +465,9 @@ def scrape_and_save():
 def _background_updater():
     while True:
         now = datetime.now(ET)
-        # Only scrape during tournament week: Jun 18-21, 6 AM-9 PM ET
-        if now.date() >= date(2026, 6, 18) and now.weekday() in (3, 4, 5, 6) and 6 <= now.hour < 21:
+        # Only scrape during tournament dates: Jul 16-19 (Birkdale plays on UK time,
+        # so scrape around the clock on those dates rather than an ET hour window).
+        if date(2026, 7, 16) <= now.date() <= date(2026, 7, 19):
             scrape_and_save()
         time.sleep(600)  # every 10 minutes
 
@@ -477,7 +479,7 @@ def start_updater():
         return
     _updater_started = True
     # Only kick off an immediate scrape once tournament week starts
-    if datetime.now(ET).date() >= date(2026, 6, 18):
+    if datetime.now(ET).date() >= date(2026, 7, 16):
         threading.Thread(target=scrape_and_save, daemon=True).start()
     # Periodic updater
     threading.Thread(target=_background_updater, daemon=True).start()

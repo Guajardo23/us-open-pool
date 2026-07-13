@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 U.S. Open Pool</title>
+<title>2026 Open Championship Pool</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap">
 <style>
@@ -188,11 +188,11 @@
 
 <div class="header">
   <div class="header-inner">
-    <div class="uso-eyebrow">126th Championship &middot; June 18&ndash;21, 2026</div>
-    <h1>U.S. OPEN</h1>
+    <div class="uso-eyebrow">154th Open Championship &middot; July 16&ndash;19, 2026</div>
+    <h1>THE OPEN</h1>
     <div class="uso-rule"></div>
-    <div class="subtitle" id="venueSubtitle">Pool &middot; Shinnecock Hills &middot; 2 Favorites + 2 Contenders + 1 Longshot</div>
-    <div class="uso-joke">hehe, shiny cock</div>
+    <div class="subtitle" id="venueSubtitle">Pool &middot; Royal Birkdale &middot; 2 Favorites + 2 Contenders + 1 Longshot</div>
+    <div class="uso-joke">hehe, dirty birkie</div>
   </div>
 </div>
 
@@ -210,7 +210,7 @@
 
     <div class="card" id="pickFormCard">
       <h2>Enter Your Picks</h2>
-      <p class="hint">Pick <strong>2 favorites</strong>, <strong>2 contenders</strong>, and <strong>1 longshot</strong>. Type a name to search. Picks lock Thursday 6:30 AM ET.</p>
+      <p class="hint">Pick <strong>2 favorites</strong>, <strong>2 contenders</strong>, and <strong>1 longshot</strong>. Type a name to search. Picks lock Thursday ~1:30 AM ET (first tee at Birkdale).</p>
 
       <div class="form-row">
         <label for="nameInput">Your Name</label>
@@ -277,28 +277,6 @@
         </div>
       </div>
 
-      <!-- Tier 4 -->
-      <div class="tier-section t4">
-        <div class="tier-header">
-          <span class="tier-badge t4">T4</span>
-          <div>
-            <div class="tier-title">Pervert Pick</div>
-            <div class="tier-desc">No scoring. Just choose the pervert you'd have a beer with if forced to.</div>
-          </div>
-          <span class="tier-pick-count">Pick 1</span>
-        </div>
-        <div class="pick-slot form-row" style="align-items:center">
-          <div class="pervert-radios">
-            <label class="radio-label">
-              <input type="radio" name="pick6" value="Tiger Woods" checked> Tiger Woods
-            </label>
-            <label class="radio-label">
-              <input type="radio" name="pick6" value="Phil Mickelson"> Phil Mickelson
-            </label>
-          </div>
-        </div>
-      </div>
-
       <div id="formMsg" class="msg hidden"></div>
       <button id="submitBtn" class="btn-primary" onclick="submitPicks()">Confirm Picks</button>
     </div>
@@ -354,7 +332,6 @@ async function loadField() {
   populateSelect("pick3", tierFields.tier2, "-- Select Tier 2 golfer --");
   populateSelect("pick4", tierFields.tier2, "-- Select Tier 2 golfer --");
   populateSelect("pick5", tierFields.tier3, "-- Select Tier 3 golfer --");
-  // pick6 is radio buttons — no population needed
 
   // Prevent same golfer in both T1 slots
   document.getElementById("pick1").addEventListener("change", () =>
@@ -468,11 +445,6 @@ function loadExistingPicks(name) {
       const el = document.getElementById(`pick${i+1}`);
       if (el) el.value = g;
     });
-    // restore T4 radio
-    if (existing[5]) {
-      const r = document.querySelector(`input[name="pick6"][value="${existing[5]}"]`);
-      if (r) r.checked = true;
-    }
     // Re-sync pair constraints after restoring saved picks
     if (tierFields.tier1.length) {
       syncTierPair("pick1", "pick2", tierFields.tier1, "-- Select Tier 1 golfer --");
@@ -527,17 +499,15 @@ async function submitPicks() {
   const name = document.getElementById("nameInput").value.trim();
   if (!name) { showMsg("Please enter your name.", "error"); return; }
 
-  // picks order: [T1a, T1b, T2a, T2b, T3, T4]
+  // picks order: [T1a, T1b, T2a, T2b, T3]
   const picks = Array.from({length: 5}, (_, i) =>
     (document.getElementById(`pick${i+1}`).value || "").trim()
   );
-  const pick6radio = document.querySelector('input[name="pick6"]:checked');
-  picks.push(pick6radio ? pick6radio.value : "");
 
   for (let i = 0; i < 5; i++) {
     if (!picks[i]) { showMsg(`Please make selection ${i+1}.`, "error"); return; }
   }
-  if (new Set(picks.slice(0,5)).size !== 5) { showMsg("All 5 picks must be different golfers.", "error"); return; }
+  if (new Set(picks).size !== 5) { showMsg("All 5 picks must be different golfers.", "error"); return; }
 
   const btn = document.getElementById("submitBtn");
   btn.disabled = true;
