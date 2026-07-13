@@ -69,9 +69,9 @@ PAYOUT = {
 MC_PAYOUT = 0
 
 # ── The Open Championship 2026 field (Royal Birkdale) ────────────────────────
-# Tier definitions are odds-based approximations built from the confirmed field.
-# Exact ESPN name spellings must be validated once ESPN publishes the field
-# (before Thursday's lock) so every pick scores.
+# Full 156-player field (Royal Birkdale), verified against theopen.com tee times.
+# Tier splits are odds-based approximations. Exact ESPN name spellings must be
+# validated once ESPN publishes the field (before Thursday's lock) so every pick scores.
 # Tier 1 — Top ~15 favorites          → pick 2
 # Tier 2 — Contenders                  → pick 2
 # Tier 3 — Longshots / qualifiers      → pick 1
@@ -96,13 +96,17 @@ TIER2 = sorted([
     "Kurt Kitayama", "Rickie Fowler", "Jake Knapp", "Patrick Reed",
     "Gary Woodland", "Matt McCarty", "Harry Hall", "Jacob Bridgeman",
     "Max Greyserman", "Max Homa", "Brooks Koepka", "Ryan Fox",
-    "Billy Horschel", "Matt Wallace", "Li Haotong", "Sam Stevens",
+    "Billy Horschel", "Matt Wallace", "Haotong Li", "Sam Stevens",
     "Nico Echavarria", "Pierceson Coody", "Keith Mitchell", "Sami Välimäki",
+    "Alex Fitzpatrick", "Eugenio Chacarra", "Tom McKibbin", "Matthew Jordan",
+    "Ryan Gerard", "J.T. Poston", "Bud Cauley", "Jackson Suber",
+    "Peter Uihlein", "Michael Thorbjornsen", "Antoine Rozner", "Victor Perez",
+    "Aldrich Potgieter",
 ])
 
 TIER3 = sorted([
     "Padraig Harrington", "Stewart Cink", "Darren Clarke", "David Duval",
-    "Francesco Molinari", "Louis Oosthuizen", "Henrik Stenson", "Ryo Hisatsune",
+    "Francesco Molinari", "Henrik Stenson", "Ryo Hisatsune",
     "Eric Cole", "David Puig", "Dan Brown", "Laurie Canter",
     "Rasmus Neergaard-Petersen", "Keita Nakajima", "Daniel Hillier", "Ángel Ayora",
     "Joakim Lagergren", "Jordan Smith", "Dan Bradbury", "Hennie du Plessis",
@@ -112,6 +116,14 @@ TIER3 = sorted([
     "Kristoffer Reitan", "Mason Howell", "Lucas Herbert", "Fifa Laopakdee",
     "Mateo Pulcini", "Jack Buchanan", "Stuart Grehan", "Tim Wiedemeyer",
     "Lev Grinberg",
+    "Matthew Baldwin", "James Nicholas", "Matthew Southgate", "Josele Ballester",
+    "Alex Smalley", "Kazuma Kobori", "Tom Sloman", "David Howard",
+    "Ren Yonezawa", "Caleb Surratt", "MJ Daffue", "Frederic Lacroix",
+    "Jack McDonald", "Jeongwoo Ham", "Ryutaro Nagano", "Alejandro de Castro Piera",
+    "Tiger Christensen", "Michael Brennan", "Shaun Norris", "Michael Hollick",
+    "Johnny Keefer", "Jesper Svensson", "Alistair Docherty", "Francesco Laporta",
+    "Cameron John", "Austen Truslow", "Sam Bairstow", "Naoyuki Kataoka",
+    "Marcus Plunkett", "Baard Skogen", "Jiho Yang", "Nevill Ruiter",
 ])
 
 FIELD = sorted(TIER1 + TIER2 + TIER3)
