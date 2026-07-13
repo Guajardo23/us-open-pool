@@ -39,18 +39,22 @@ TOURNAMENT_YEAR   = "2026"
 TOURNAMENT_VENUE  = "Royal Birkdale · Southport, England"
 PAR               = 70   # Royal Birkdale par 70
 
-# ── Payout table (~$17M purse, The Open Championship structure) ───────────────
+# ── Payout table (official 2026 Open Championship prize money, positions 1-70) ─
 PAYOUT = {
-     1: 3100000,  2: 1759000,  3: 1128000,  4:  878000,  5:  707000,
-     6:  613000,  7:  527000,  8:  442000,  9:  402000, 10:  361500,
-    11:  328500, 12:  302000, 13:  283000, 14:  264000, 15:  250500,
-    16:  237500, 17:  224500, 18:  211500, 19:  198500, 20:  188000,
-    21:  179500, 22:  171000, 23:  162500, 24:  154000, 25:  145500,
-    26:  137000, 27:  132000, 28:  127000, 29:  122000, 30:  117000,
-    31:  112000, 32:  107000, 33:  102000, 34:   97500, 35:   93500,
-    36:   90000, 37:   86500, 38:   83500, 39:   80500, 40:   77500,
-    41:   74500, 42:   71500, 43:   68500, 44:   65500, 45:   62500,
-    46:   59500, 47:   56500, 48:   54000, 49:   52000, 50:   50500,
+     1: 3100000,  2: 1759000,  3: 1128000,  4:  876000,  5:  705000,
+     6:  611000,  7:  525000,  8:  442500,  9:  388000, 10:  350600,
+    11:  319200, 12:  282800, 13:  266000, 14:  249000, 15:  231000,
+    16:  212700, 17:  202400, 18:  193000, 19:  184900, 20:  176200,
+    21:  168000, 22:  159600, 23:  151000, 24:  142600, 25:  137800,
+    26:  131800, 27:  127000, 28:  122600, 29:  117300, 30:  111200,
+    31:  107600, 32:  102100, 33:   98500, 34:   95700, 35:   92400,
+    36:   88700, 37:   84600, 38:   80300, 39:   77400, 40:   74900,
+    41:   71800, 42:   68300, 43:   65200, 44:   61500, 45:   58000,
+    46:   55000, 47:   52800, 48:   50700, 49:   48400, 50:   47200,
+    51:   46200, 52:   45400, 53:   44700, 54:   44000, 55:   43300,
+    56:   42700, 57:   42300, 58:   42000, 59:   41700, 60:   41400,
+    61:   41200, 62:   41000, 63:   40800, 64:   40600, 65:   40300,
+    66:   40000, 67:   39700, 68:   39400, 69:   39100, 70:   38900,
 }
 MC_PAYOUT = 0
 
@@ -95,7 +99,7 @@ TIER3 = sorted([
     "Andy Sullivan", "Bernd Wiesberger", "Kazuki Higa", "Casey Jarvis",
     "Kota Kaneko", "Travis Smyth", "Scott Vincent", "Martin Couvra",
     "Joe Dean", "John Parry", "Adrien Saddier", "Jayden Schaper",
-    "Kristoffer Reitan", "Mason Howell", "Jackson Koivun", "Fifa Laopakdee",
+    "Kristoffer Reitan", "Mason Howell", "Lucas Herbert", "Fifa Laopakdee",
     "Mateo Pulcini", "Jack Buchanan", "Stuart Grehan", "Tim Wiedemeyer",
     "Lev Grinberg",
 ])
@@ -168,7 +172,7 @@ def compute_projected_earnings(golfers):
     earnings = {}
     for pos_num, names in pos_groups.items():
         count = len(names)
-        total = sum(PAYOUT.get(pos_num + i, PAYOUT.get(50, 56700)) for i in range(count))
+        total = sum(PAYOUT.get(pos_num + i, PAYOUT.get(70, 38900)) for i in range(count))
         per = total // count
         for name in names:
             earnings[name] = per
